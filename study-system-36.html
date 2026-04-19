@@ -131,7 +131,7 @@
     <div class="step-tab active" onclick="goToStep(0)" id="tab0">Step 1｜通しリスニング</div>
     <div class="step-tab" onclick="goToStep(1)" id="tab1">Step 2｜本文精読</div>
     <div class="step-tab" onclick="goToStep(2)" id="tab2">Step 3｜確認クイズ</div>
-    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜AIと復習</div>
+    <div class="step-tab" onclick="goToStep(3)" id="tab3">Step 4｜イディオム復習</div>
   </div>
 </div>
 
@@ -407,47 +407,55 @@
         <p id="scoreMsg" style="font-size:15px; color:#333; margin-top:8px;"></p>
       </div>
 
-      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜AIと復習へ →</button>
+      <button class="next-step-btn" id="toStep4Btn" style="margin-top:16px; display:none;" onclick="completeStep(2)">Step 4｜イディオム復習へ →</button>
     </div>
   </div>
 
   <!-- STEP 4 -->
   <div class="step-section" id="step3">
     <div class="card">
-      <div class="card-title"><span>🤖</span> Step 4｜AIと復習</div>
+      <div class="card-title"><span>🃏</span> Step 4｜イディオム復習カード</div>
       <div class="card" style="background: var(--light-blue); margin-bottom:16px;">
         <div style="font-size:13px; font-weight:700; color:var(--blue); margin-bottom:6px;">【15字要約】</div>
         <div style="font-size:20px; font-weight:900; color:#222;">ミツバチ減少 食を守る課題</div>
       </div>
       <div class="step-intro">
-        <strong>AIに質問して復習しよう！</strong>
-        わからなかった単語・イディオム・文法について何でも質問できます。日本語でも英語でもOK。
+        <strong>イディオムをカードで復習しよう！</strong>
+        英語を見て日本語の意味を思い浮かべてから、カードをタップして答えを確認しよう。
       </div>
-      <div class="ai-chat-area">
-        <div class="ai-messages" id="aiMessages">
-          <div class="ai-msg">
-            <div class="avatar">AI</div>
-            <div class="bubble">
-              こんにちは！Unit 36「The Importance of Bees」について、何でも質問してください😊<br><br>
-              例えば：<br>
-              ・「it won't be long before の使い方を教えて」<br>
-              ・「owing to と because of の違いは？」<br>
-              ・「come to light の例文を作って」
-            </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="font-size:13px; color:#888;">カード <span id="cardCurrent">1</span> / <span id="cardTotal">14</span></div>
+        <div style="font-size:13px; color:var(--green); font-weight:700;" id="cardScore">✓ 0 &nbsp; ✗ 0</div>
+      </div>
+      <div style="background:#f0f0f0; height:6px; border-radius:3px; margin-bottom:20px;">
+        <div id="cardProgressBar" style="background:var(--blue); height:6px; border-radius:3px; width:0%; transition:width 0.3s;"></div>
+      </div>
+      <div id="flashcard" onclick="flipCard()" style="cursor:pointer; perspective:1000px; margin-bottom:20px; user-select:none;">
+        <div id="cardInner" style="position:relative; min-height:160px; transition:transform 0.5s; transform-style:preserve-3d;">
+          <div id="cardFront" style="position:absolute; inset:0; background:white; border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden;">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">英語 → タップして日本語を確認</div>
+            <div id="cardEn" style="font-family:'Lato',sans-serif; font-size:22px; font-weight:900; color:#1a1a1a; text-align:center;"></div>
+          </div>
+          <div id="cardBack" style="position:absolute; inset:0; background:var(--light-blue); border:2px solid var(--blue); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; backface-visibility:hidden; transform:rotateY(180deg);">
+            <div style="font-size:11px; font-weight:700; color:var(--blue); letter-spacing:0.1em; margin-bottom:12px; text-transform:uppercase;">日本語</div>
+            <div id="cardJa" style="font-size:19px; font-weight:700; color:var(--blue); text-align:center;"></div>
           </div>
         </div>
-        <div class="ai-input-row">
-          <textarea class="ai-input" id="aiInput" placeholder="質問を入力してください..." rows="2" onkeydown="handleEnter(event)"></textarea>
-          <button class="ai-send" id="aiSendBtn" onclick="sendMessage()">➤</button>
-        </div>
       </div>
-      <div style="margin-top:20px;">
-        <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
+      <div id="cardButtons" style="display:none; gap:12px; margin-bottom:16px;">
+        <button onclick="judgeCard(false)" style="flex:1; padding:12px; background:#fdecea; border:2px solid var(--red); border-radius:8px; color:var(--red); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✗ もう一度</button>
+        <button onclick="judgeCard(true)" style="flex:1; padding:12px; background:var(--light-green); border:2px solid var(--green); border-radius:8px; color:var(--green); font-weight:700; font-size:15px; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">✓ わかった！</button>
       </div>
+      <div id="cardResult" style="display:none; background:var(--light-green); border-radius:10px; padding:20px; text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px; font-weight:900; color:var(--green); font-family:'Lato',sans-serif;" id="finalScore"></div>
+        <div style="font-size:14px; color:#555; margin:8px 0 14px;" id="finalMsg"></div>
+        <button onclick="restartCards()" style="background:var(--blue); color:white; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; font-family:'Noto Sans JP',sans-serif;">🔄 もう一度チャレンジ</button>
+      </div>
+      <button class="next-step-btn" style="background: var(--green);" onclick="completeStep(3)">✓ 学習完了！</button>
     </div>
     <div class="completion-banner" id="completionBanner" style="display:none;">
       <h2>🎉 Unit 36 完了！</h2>
-      <p>お疲れ様でした。ミツバチの重要性と減少問題について学習しました。<br>次のユニットへ進みましょう！</p>
+      <p>お疲れ様でした。激減するミツバチについて学習しました。<br>次のユニットへ進みましょう！</p>
     </div>
   </div>
 
@@ -514,62 +522,32 @@
     result.scrollIntoView({behavior:'smooth'});
   }
 
-  const SYSTEM_PROMPT=`あなたは英語学習のサポーターです。
-現在学習中の教材は「Unit 36: The Importance of Bees（激減するミツバチ）」です。
-
-本文（英語）:
-①A huge decline in the number of honeybees worldwide has come to light. In the United States, beekeepers reported losses of as much as 45% of their colonies between April 2020 and April 2021. Is this something that you should be worried about? If you eat food, then yes, you should certainly take notice of this problem.
-②The history of beekeeping goes back as far as 9,000 years. Bees were traditionally kept for honey, but today a lot of bees are used for pollinating plants. According to the FAO, three out of four crops producing fruits or seeds for human use as food depend on pollinators. These include almonds, apples, coffee, and strawberries.
-③There are many causes for the decline in honeybees. The decline started in the 1980s when certain parasites entered the United States. To be sure, natural events such as drought and disease are affecting bees in many areas. But in many cases the decline is owing to human farming practices, such as the destruction of habitats by farmers, which interferes with bees' natural behaviors. In addition, chemicals used on crops by farmers weaken the bees' immune systems.
-④If nothing is done, it won't be long before honeybee colonies die out altogether. Beekeepers and farmers need to take account of bee deaths and report them to the government. And governments need to work on policies to protect bees.
-
-重要イディオム: come to light / as much as / be worried about / take notice of / go back as far as / according to / depend on / to be sure / owing to / interfere with / in addition / it won't be long before / die out / take account of / work on
-
-以下の役割を果たしてください：
-- 学習者の質問に日本語でわかりやすく答える
-- イディオム・単語・文法の説明は例文を使って丁寧に
-- 本文の内容に関する質問にも的確に答える
-- 励ましながら学習をサポートする
-- 回答は簡潔に（200文字以内を目安に）`;
-
-  const conversationHistory=[];
-  let msgCounter=0;
-
-  async function sendMessage() {
-    const input=document.getElementById('aiInput');
-    const text=input.value.trim();
-    if(!text) return;
-    addMessage('user',text); input.value='';
-    conversationHistory.push({role:'user',content:text});
-    document.getElementById('aiSendBtn').disabled=true;
-    const loadingId=addMessage('assistant','<span class="loading-dots"><span>●</span><span>●</span><span>●</span></span>');
-    try {
-      const response=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM_PROMPT,messages:conversationHistory})
-      });
-      const data=await response.json();
-      const reply=data.content?.map(c=>c.text||'').join('')||'エラーが発生しました。';
-      conversationHistory.push({role:'assistant',content:reply});
-      updateMessage(loadingId,reply);
-    } catch(e){updateMessage(loadingId,'エラーが発生しました。もう一度試してください。');}
-    document.getElementById('aiSendBtn').disabled=false;
-  }
-  function addMessage(role,html) {
-    const id='msg-'+(++msgCounter);
-    const container=document.getElementById('aiMessages');
-    const div=document.createElement('div');
-    div.className='ai-msg '+(role==='user'?'user':'');
-    div.id=id;
-    div.innerHTML=`<div class="avatar">${role==='user'?'あ':'AI'}</div><div class="bubble">${html}</div>`;
-    container.appendChild(div); container.scrollTop=container.scrollHeight;
-    return id;
-  }
-  function updateMessage(id,text) {
-    const el=document.getElementById(id);
-    if(el){el.querySelector('.bubble').textContent=text;document.getElementById('aiMessages').scrollTop=99999;}
-  }
-  function handleEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+  // ===== FLASHCARD =====
+  const idioms=[
+    {en:'come to light',ja:'明らかになる；明るみに出る'},
+    {en:'as many [much] as ~',ja:'〜ほど多数（多量）の'},
+    {en:'be worried about ~',ja:'〜を心配する；〜を気にする'},
+    {en:'take notice of ~',ja:'〜に注意を払う；〜を気に留める'},
+    {en:'a lot of ~',ja:'多数の〜；多量の〜'},
+    {en:'depend on [upon] ~',ja:'〜次第である；〜を頼りにする'},
+    {en:'to be sure',ja:'確かに；なるほど'},
+    {en:'owing to ~',ja:'〜が原因で；〜のために'},
+    {en:'interfere with ~',ja:'〜を妨げる；〜の邪魔をする'},
+    {en:'in addition (to ~)',ja:'（〜に）加えて；さらに'},
+    {en:'die out',ja:'絶滅（死滅・消滅）する'},
+    {en:'take account of ~',ja:'〜を考慮に入れる'},
+    {en:'work on ~',ja:'〜に取り組む；〜に影響を与える'},
+    {en:"it won't be long before ...",ja:'すぐに…だろう'}
+  ];
+  let cardIndex=0,cardFlipped=false,okCount=0,ngCount=0,order=[];
+  function shuffleArray(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function initCards(){order=shuffleArray([...Array(idioms.length).keys()]);cardIndex=0;cardFlipped=false;okCount=0;ngCount=0;document.getElementById('cardTotal').textContent=idioms.length;document.getElementById('cardResult').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('flashcard').style.display='block';showCard();}
+  function showCard(){const idx=order[cardIndex];document.getElementById('cardEn').textContent=idioms[idx].en;document.getElementById('cardJa').textContent=idioms[idx].ja;document.getElementById('cardCurrent').textContent=cardIndex+1;document.getElementById('cardProgressBar').style.width=((cardIndex/idioms.length)*100)+'%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;cardFlipped=false;document.getElementById('cardInner').style.transform='rotateY(0deg)';document.getElementById('cardButtons').style.display='none';}
+  function flipCard(){if(cardFlipped)return;cardFlipped=true;document.getElementById('cardInner').style.transform='rotateY(180deg)';document.getElementById('cardButtons').style.display='flex';}
+  function judgeCard(ok){if(ok)okCount++;else ngCount++;cardIndex++;if(cardIndex>=idioms.length)showResult();else showCard();}
+  function showResult(){document.getElementById('flashcard').style.display='none';document.getElementById('cardButtons').style.display='none';document.getElementById('cardProgressBar').style.width='100%';document.getElementById('cardScore').innerHTML='✓ '+okCount+' &nbsp; ✗ '+ngCount;const result=document.getElementById('cardResult');result.style.display='block';document.getElementById('finalScore').textContent=okCount+' / '+idioms.length;const pct=Math.round(okCount/idioms.length*100);document.getElementById('finalMsg').textContent=pct===100?'🎉 全問正解！完璧です！':pct>=80?'👏 よくできました！':pct>=60?'📖 もう一周チャレンジしてみよう！':'💪 繰り返して覚えよう！';}
+  function restartCards(){initCards();}
+  window.addEventListener('load',function(){initCards();});
 </script>
 
 </body>
